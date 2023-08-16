@@ -11,11 +11,14 @@ public class Player : MonoBehaviour
     private CharacterController characterController;
     private Animator animator;
     private Vector3 currentMovement;
+    private Vector3 cameraRelativeMovement;
     private bool isJumping;
     private bool isMoving;
+    private float currentVelocity;
 
     private int isWalkingHash;
     private int isJumpingHash;
+    private int velocityHash;
 
     [SerializeField] private float jumpForce = 100;
     [SerializeField] private float velocity = 10;
@@ -47,7 +50,6 @@ public class Player : MonoBehaviour
         Vector2 inputData = context.ReadValue<Vector2>();
         currentMovement.x = inputData.x;
         currentMovement.z = inputData.y;
-        print(inputData);
         isMoving = inputData.x != 0 || inputData.y != 0;
     }
 
@@ -67,14 +69,17 @@ public class Player : MonoBehaviour
 
     private void MovePlayer()
     {
-        Vector3 cameraRelativeMovement = ConverToCameraSpace(currentMovement);
-        characterController.Move(currentMovement * velocity * Time.deltaTime);
+        cameraRelativeMovement = ConverToCameraSpace(currentMovement);
+        characterController.Move(cameraRelativeMovement * velocity * Time.deltaTime);
+        currentVelocity = characterController.velocity.magnitude / 10f;
+        print("velocity: " + currentVelocity);
     }
 
     private void AnimationHandler()
     {
         bool isMovingAnimation = animator.GetBool(isWalkingHash);
         bool isJumpingAnimation = animator.GetBool(isJumpingHash);
+        animator.SetFloat(velocityHash, currentVelocity);
 
         if(isMoving && !isMovingAnimation)
         {
@@ -120,9 +125,9 @@ public class Player : MonoBehaviour
     {
         float rotationFactorPerFrame = 10;
         Vector3 positionToLookAt;
-        positionToLookAt.x = currentMovement.x;
+        positionToLookAt.x = cameraRelativeMovement.x;
         positionToLookAt.y = 0f;
-        positionToLookAt.z = currentMovement.z;
+        positionToLookAt.z = cameraRelativeMovement.z;
         Quaternion currentRotation = transform.rotation;
 
         if (isMoving)
@@ -136,6 +141,7 @@ public class Player : MonoBehaviour
     {
         isWalkingHash = Animator.StringToHash("isMoving");
         isJumpingHash = Animator.StringToHash("isJumping");
+        velocityHash = Animator.StringToHash("velocity");
     }
 
     private void OnEnable()
