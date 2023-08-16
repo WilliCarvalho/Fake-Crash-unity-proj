@@ -8,10 +8,14 @@ using UnityEngine.InputSystem;
 public class Player : MonoBehaviour
 {
     private PlayerControls playerControl;
-    private Rigidbody rigidbody;
+    private CharacterController characterController;
+    private Animator animator;
     private Vector3 currentMovement;
     private bool isJumping;
-    private bool canJump;
+    private bool isMoving;
+
+    private int isWalkingHash;
+    private int isJumpingHash;
 
     [SerializeField] private float jumpForce = 100;
     [SerializeField] private float velocity = 10;
@@ -19,7 +23,9 @@ public class Player : MonoBehaviour
     private void Awake()
     {
         playerControl = new PlayerControls();
-        rigidbody = GetComponent<Rigidbody>();
+        characterController = GetComponent<CharacterController>();
+        animator = GetComponent<Animator>();
+        GetAnimatorParameters();
 
         playerControl.PlayerActions.Move.started += OnMoveInput;
         playerControl.PlayerActions.Move.performed += OnMoveInput;
@@ -27,13 +33,13 @@ public class Player : MonoBehaviour
 
         playerControl.PlayerActions.Jump.started += OnJumpInput;
         playerControl.PlayerActions.Jump.canceled += OnJumpInput;
-
-        canJump = true;
     }
 
     void FixedUpdate()
     {
         MovePlayer();
+        AnimationHandler();
+        RotationHandler();
     }
 
     public void OnMoveInput(InputAction.CallbackContext context)
@@ -41,6 +47,8 @@ public class Player : MonoBehaviour
         Vector2 inputData = context.ReadValue<Vector2>();
         currentMovement.x = inputData.x;
         currentMovement.z = inputData.y;
+        print(inputData);
+        isMoving = inputData.x != 0 || inputData.y != 0;
     }
 
     public void OnJumpInput(InputAction.CallbackContext context)
@@ -51,17 +59,40 @@ public class Player : MonoBehaviour
 
     private void Jump()
     {
-        if (canJump)
+        if (characterController.isGrounded)
         {
-            rigidbody.AddForce(Vector3.up * jumpForce);
-            canJump = false;
+            GetComponent<Rigidbody>().AddForce(Vector3.up * jumpForce);
         }
     }
 
     private void MovePlayer()
     {
         Vector3 cameraRelativeMovement = ConverToCameraSpace(currentMovement);
-        transform.Translate(cameraRelativeMovement * velocity * Time.deltaTime);        
+        characterController.Move(currentMovement * velocity * Time.deltaTime);
+    }
+
+    private void AnimationHandler()
+    {
+        bool isMovingAnimation = animator.GetBool(isWalkingHash);
+        bool isJumpingAnimation = animator.GetBool(isJumpingHash);
+
+        if(isMoving && !isMovingAnimation)
+        {
+            animator.SetBool(isWalkingHash, true);
+        }
+        else if (!isMoving && isMovingAnimation)
+        {
+            animator.SetBool(isWalkingHash, false);
+        }
+
+        if(isJumping && !isJumpingAnimation)
+        {
+            animator.SetBool(isJumpingHash, true);
+        }
+        else if(!isJumping && isJumpingAnimation)
+        {
+            animator.SetBool(isJumpingHash, false);
+        }
     }
 
     private Vector3 ConverToCameraSpace(Vector3 vectorToRotate)
@@ -71,7 +102,7 @@ public class Player : MonoBehaviour
         Vector3 cameraForward = Camera.main.transform.forward;
         Vector3 cameraRight = Camera.main.transform.right;
 
-        cameraForward.y = 0; 
+        cameraForward.y = 0;
         cameraRight.y = 0;
 
         cameraForward = cameraForward.normalized;
@@ -85,12 +116,26 @@ public class Player : MonoBehaviour
         return vectorRotatedToCameraSpace;
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private void RotationHandler()
     {
-        if (collision.collider.tag == "Floor")
+        float rotationFactorPerFrame = 10;
+        Vector3 positionToLookAt;
+        positionToLookAt.x = currentMovement.x;
+        positionToLookAt.y = 0f;
+        positionToLookAt.z = currentMovement.z;
+        Quaternion currentRotation = transform.rotation;
+
+        if (isMoving)
         {
-            canJump = true;
+            Quaternion targetRotation = Quaternion.LookRotation(positionToLookAt);
+            transform.rotation = Quaternion.Slerp(currentRotation, targetRotation, rotationFactorPerFrame * Time.deltaTime);
         }
+    }
+
+    private void GetAnimatorParameters()
+    {
+        isWalkingHash = Animator.StringToHash("isMoving");
+        isJumpingHash = Animator.StringToHash("isJumping");
     }
 
     private void OnEnable()
