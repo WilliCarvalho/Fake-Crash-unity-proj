@@ -7,27 +7,31 @@ using UnityEngine.InputSystem;
 
 public class Player : MonoBehaviour
 {
+    private const float gravityScale = -9.81f;
+
     private PlayerControls playerControl;
     private CharacterController characterController;
     private Animator animator;
+    private Transform playerTransform;
     private Vector3 currentMovement;
     private Vector3 cameraRelativeMovement;
     private bool isJumping;
     private bool isMoving;
     private float currentVelocity;
 
-    private int isWalkingHash;
     private int isJumpingHash;
     private int velocityHash;
 
-    [SerializeField] private float jumpForce = 100;
+    [SerializeField] private float jumpHeight = 10;
     [SerializeField] private float velocity = 10;
 
     private void Awake()
     {
+        
         playerControl = new PlayerControls();
         characterController = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
+        playerTransform = GetComponent<Transform>();
         GetAnimatorParameters();
 
         playerControl.PlayerActions.Move.started += OnMoveInput;
@@ -40,15 +44,23 @@ public class Player : MonoBehaviour
 
     void FixedUpdate()
     {
-        MovePlayer();
+        MoveHandler();
         AnimationHandler();
         RotationHandler();
+        GravityHandler();
+        print(characterController.isGrounded);
+    }
+
+    private void GravityHandler()
+    {        
+        currentMovement.y += gravityScale * Time.deltaTime;
     }
 
     public void OnMoveInput(InputAction.CallbackContext context)
     {
         Vector2 inputData = context.ReadValue<Vector2>();
         currentMovement.x = inputData.x;
+        currentMovement.y = 0;
         currentMovement.z = inputData.y;
         isMoving = inputData.x != 0 || inputData.y != 0;
     }
@@ -63,32 +75,21 @@ public class Player : MonoBehaviour
     {
         if (characterController.isGrounded)
         {
-            GetComponent<Rigidbody>().AddForce(Vector3.up * jumpForce);
+            currentMovement.y += Mathf.Sqrt(jumpHeight * gravityScale * -1);
         }
     }
 
-    private void MovePlayer()
+    private void MoveHandler()
     {
-        cameraRelativeMovement = ConverToCameraSpace(currentMovement);
+        currentVelocity = characterController.velocity.magnitude;
+        cameraRelativeMovement = ConvertToCameraSpace(currentMovement);
         characterController.Move(cameraRelativeMovement * velocity * Time.deltaTime);
-        currentVelocity = characterController.velocity.magnitude / 10f;
-        print("velocity: " + currentVelocity);
     }
 
     private void AnimationHandler()
     {
-        bool isMovingAnimation = animator.GetBool(isWalkingHash);
         bool isJumpingAnimation = animator.GetBool(isJumpingHash);
         animator.SetFloat(velocityHash, currentVelocity);
-
-        if(isMoving && !isMovingAnimation)
-        {
-            animator.SetBool(isWalkingHash, true);
-        }
-        else if (!isMoving && isMovingAnimation)
-        {
-            animator.SetBool(isWalkingHash, false);
-        }
 
         if(isJumping && !isJumpingAnimation)
         {
@@ -100,26 +101,23 @@ public class Player : MonoBehaviour
         }
     }
 
-    private Vector3 ConverToCameraSpace(Vector3 vectorToRotate)
+    private Vector3 ConvertToCameraSpace(Vector3 vectorToRotate)
     {
         float currentYValue = vectorToRotate.y;
-
         Vector3 cameraForward = Camera.main.transform.forward;
         Vector3 cameraRight = Camera.main.transform.right;
 
         cameraForward.y = 0;
         cameraRight.y = 0;
 
-        cameraForward = cameraForward.normalized;
-        cameraRight = cameraRight.normalized;
+        Vector3 cameraForwardZproduct = cameraForward * vectorToRotate.z;
+        Vector3 cameraRightXProduct = cameraRight * vectorToRotate.x;
 
-        Vector3 cameraForwardZproduct = vectorToRotate.z * cameraForward;
-        Vector3 cameraRightXProduct = vectorToRotate.x * cameraRight;
-
-        Vector3 vectorRotatedToCameraSpace = cameraForwardZproduct + cameraRightXProduct;
-        vectorRotatedToCameraSpace.y = currentYValue;
-        return vectorRotatedToCameraSpace;
+        Vector3 directionToMovePlayer = cameraForwardZproduct + cameraRightXProduct;
+        directionToMovePlayer.y = currentYValue;
+        return directionToMovePlayer;
     }
+
 
     private void RotationHandler()
     {
@@ -139,7 +137,6 @@ public class Player : MonoBehaviour
 
     private void GetAnimatorParameters()
     {
-        isWalkingHash = Animator.StringToHash("isMoving");
         isJumpingHash = Animator.StringToHash("isJumping");
         velocityHash = Animator.StringToHash("velocity");
     }
