@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,34 +11,25 @@ public class PlayerMovementComponent : MonoBehaviour
     private Vector3 currentMovement;
     private Vector2 inputData;
     private float playerVelocity;
-    private bool canMove;
+    private bool isMoving;
     private CharacterController characterController;
 
     private void Awake()
     {
-        characterController = PlayerManager.instance.GetCharacterController();
-        playerVelocity = PlayerManager.instance.GetPlayerVelocity();
+        inputData = new Vector2(0, 0);
+        PlayerManager.HandleMoveInput += SetMoveInfo;
+        characterController = GetComponent<CharacterController>();
+    }
+
+    private void SetMoveInfo(InputAction.CallbackContext context, float velocity)
+    {
+        playerVelocity = velocity;
+        inputData = context.ReadValue<Vector2>();
     }
 
     private void Update()
     {
-        if (canMove)
-        {
-            MoveHandler(inputData);
-        }
-    }
-
-    public void MovePlayer(InputAction.CallbackContext context)
-    {
-        inputData = context.ReadValue<Vector2>();
-        if(inputData.y != 0 || inputData.x != 0)
-        {
-            canMove = true;
-        }
-        else
-        {
-            canMove = false;
-        }
+        MoveHandler(inputData);
     }
 
     private void MoveHandler(Vector2 inputData)
@@ -46,9 +38,7 @@ public class PlayerMovementComponent : MonoBehaviour
         currentMovement.y = 0;
         currentMovement.z = inputData.y;
 
-        bool isMoving = inputData.x != 0 || inputData.y != 0;
-        PlayerManager.instance.SetIsMoving(isMoving);
-
+        isMoving = inputData.x != 0 || inputData.y != 0;
         //currentVelocity = characterController.velocity.magnitude;
         characterController.Move(currentMovement * playerVelocity * Time.deltaTime);
         RotationHandler();
@@ -64,7 +54,7 @@ public class PlayerMovementComponent : MonoBehaviour
         positionToLookAt.z = currentMovement.z;
         Quaternion currentRotation = transform.rotation;
 
-        if (PlayerManager.instance.GetIsMoving())
+        if (isMoving)
         {
             Quaternion targetRotation = Quaternion.LookRotation(positionToLookAt);
             transform.rotation = Quaternion.Slerp(currentRotation, targetRotation, rotationFactorPerFrame * Time.deltaTime);
@@ -77,5 +67,10 @@ public class PlayerMovementComponent : MonoBehaviour
         {
             //currentMovement.y += Mathf.Sqrt(jumpHeight * gravityScale * -1);
         }
+    }
+
+    private void OnDisable()
+    {
+        PlayerManager.HandleMoveInput -= SetMoveInfo;
     }
 }
