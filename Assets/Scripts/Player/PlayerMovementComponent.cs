@@ -9,6 +9,7 @@ using static UnityEditor.Timeline.TimelinePlaybackControls;
 public class PlayerMovementComponent : MonoBehaviour
 {
     private Vector3 currentMovement;
+    private Vector3 cameraRelativeMovement;
     private Vector2 inputData;
     private float playerVelocity;
     private bool isMoving;
@@ -16,7 +17,6 @@ public class PlayerMovementComponent : MonoBehaviour
 
     private void Awake()
     {
-        inputData = new Vector2(0, 0);
         PlayerManager.HandleMoveInput += SetMoveInfo;
         characterController = GetComponent<CharacterController>();
     }
@@ -25,6 +25,7 @@ public class PlayerMovementComponent : MonoBehaviour
     {
         playerVelocity = velocity;
         inputData = context.ReadValue<Vector2>();
+        isMoving = inputData.x != 0 || inputData.y != 0;
     }
 
     private void Update()
@@ -38,9 +39,8 @@ public class PlayerMovementComponent : MonoBehaviour
         currentMovement.y = 0;
         currentMovement.z = inputData.y;
 
-        isMoving = inputData.x != 0 || inputData.y != 0;
-        //currentVelocity = characterController.velocity.magnitude;
-        characterController.Move(currentMovement * playerVelocity * Time.deltaTime);
+        cameraRelativeMovement = ConvertToCameraSpace(currentMovement);
+        characterController.Move(cameraRelativeMovement * playerVelocity * Time.deltaTime);
         RotationHandler();
     }
 
@@ -49,9 +49,9 @@ public class PlayerMovementComponent : MonoBehaviour
     {
         float rotationFactorPerFrame = 10;
         Vector3 positionToLookAt;
-        positionToLookAt.x = currentMovement.x;
+        positionToLookAt.x = cameraRelativeMovement.x;
         positionToLookAt.y = 0f;
-        positionToLookAt.z = currentMovement.z;
+        positionToLookAt.z = cameraRelativeMovement.z;
         Quaternion currentRotation = transform.rotation;
 
         if (isMoving)
@@ -61,12 +61,28 @@ public class PlayerMovementComponent : MonoBehaviour
         }
     }
 
+    private Vector3 ConvertToCameraSpace(Vector3 vectorToRotate)
+    {
+        float currentYValue = vectorToRotate.y;
+
+        Vector3 cameraForward = Camera.main.transform.forward;
+        Vector3 cameraRight = Camera.main.transform.right;
+
+        cameraForward.y = 0;
+        cameraRight.y = 0;
+
+        Vector3 cameraForwardZproduct = cameraForward * vectorToRotate.z;
+        Vector3 cameraRightXProduct = cameraRight * vectorToRotate.x;
+
+        Vector3 directionToMovePlayer = cameraForwardZproduct + cameraRightXProduct;
+        directionToMovePlayer.y = currentYValue;
+
+        return directionToMovePlayer;
+    }
+
     private void Jump()
     {
-        if (characterController.isGrounded)
-        {
-            //currentMovement.y += Mathf.Sqrt(jumpHeight * gravityScale * -1);
-        }
+        
     }
 
     private void OnDisable()

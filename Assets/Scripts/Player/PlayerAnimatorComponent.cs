@@ -1,17 +1,20 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerAnimatorComponent : MonoBehaviour
 {
     private Animator animator;
-
     private int isJumpingHash;
     private int velocityHash;
-
-    private float playerCurrentVelocity;
+    private CharacterController characterController;
+    float currentVelocity;
     private void Awake()
     {
+        characterController = GetComponent<CharacterController>();
+
         animator = GetComponent<Animator>();
         isJumpingHash = Animator.StringToHash("isJumping");
         velocityHash = Animator.StringToHash("velocity");
@@ -19,15 +22,14 @@ public class PlayerAnimatorComponent : MonoBehaviour
 
     private void Update()
     {
-        //playerCurrentVelocity = PlayerManager.instance.GetCurrentVelocity();
         AnimationHandler();
     }
 
     private void AnimationHandler()
     {
         bool isJumpingAnimation = animator.GetBool(isJumpingHash);
-        //bool isJumping = PlayerManager.instance.GetIsJumping();
-        animator.SetFloat(velocityHash, playerCurrentVelocity);
+        currentVelocity = characterController.velocity.magnitude;
+        animator.SetFloat(velocityHash, currentVelocity);
 
         //if (isJumping && !isJumpingAnimation)
         //{

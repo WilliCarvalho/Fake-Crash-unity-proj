@@ -5081,7 +5081,8 @@ GameObject:
   m_Component:
   - component: {fileID: 2469561837941544401}
   - component: {fileID: 1090679133668865436}
-  - component: {fileID: 824136186074834758}
+  - component: {fileID: 6035583082689047642}
+  - component: {fileID: 7742327423773140650}
   - component: {fileID: 6318525245604405983}
   - component: {fileID: 6602430859682054568}
   m_Layer: 0
@@ -5130,7 +5131,7 @@ Transform:
   - {fileID: 7021318817264993344}
   - {fileID: 4224871950292446857}
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &1090679133668865436
 Animator:
@@ -5153,8 +5154,8 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!143 &824136186074834758
-CharacterController:
+--- !u!136 &6035583082689047642
+CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -5171,14 +5172,38 @@ CharacterController:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 3
-  m_Height: 1.7
+  serializedVersion: 2
   m_Radius: 0.5
-  m_SlopeLimit: 45
-  m_StepOffset: 0.3
-  m_SkinWidth: 0.08
-  m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0.85, z: 0}
+  m_Height: 1.5975465
+  m_Direction: 1
+  m_Center: {x: 0, y: 0.7859923, z: 0}
+--- !u!54 &7742327423773140650
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7855674303340810878}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 80
+  m_CollisionDetection: 0
 --- !u!114 &6318525245604405983
 MonoBehaviour:
   m_ObjectHideFlags: 0
