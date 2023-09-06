@@ -15,12 +15,21 @@ public class PlayerMovementComponent : MonoBehaviour
     private float playerVelocity;
     private float gravityValue = -9.81f;
     private bool isMoving;
+    private bool jumpTrigger;
     private CharacterController characterController;
+
+    [SerializeField] private float jumpHeight = 1;
 
     private void Awake()
     {
         PlayerManager.HandleMoveInput += SetMoveInfo;
+        PlayerManager.HandleJumpInput += MakePlayerJump;
         characterController = GetComponent<CharacterController>();
+    }
+
+    private void MakePlayerJump(bool inputValue)
+    {
+        jumpTrigger = inputValue;
     }
 
     private void SetMoveInfo(InputAction.CallbackContext context, float velocity)
@@ -34,6 +43,15 @@ public class PlayerMovementComponent : MonoBehaviour
     {
         MoveHandler(inputData);
         GravityHandler();
+        JumpHandler();
+    }
+
+    private void JumpHandler()
+    {
+        if (jumpTrigger && characterController.isGrounded)
+        {
+            currentMovement.y += Mathf.Sqrt(jumpHeight * -3.0f * gravityValue);
+        }
     }
 
     private void GravityHandler()

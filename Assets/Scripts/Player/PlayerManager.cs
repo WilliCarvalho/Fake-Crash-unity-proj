@@ -5,6 +5,7 @@ using UnityEngine.InputSystem;
 public class PlayerManager : MonoBehaviour
 {
     public static event Action<InputAction.CallbackContext, float> HandleMoveInput;
+    public static event Action<bool> HandleJumpInput;
     private Transform playerTransform;
     private bool isJumping;
     private bool isMoving;
@@ -21,6 +22,12 @@ public class PlayerManager : MonoBehaviour
     private void PlayerManagerSetUpListenerns()
     {
         GameSystem.OnMoveInputContextReceived += MovePlayer;
+        GameSystem.OnJumpInputContextReceived += JumpPlayer;
+    }
+
+    private void JumpPlayer(bool isJumpPressed)
+    {
+        HandleJumpInput?.Invoke(isJumpPressed);
     }
 
     private void MovePlayer(InputAction.CallbackContext context)

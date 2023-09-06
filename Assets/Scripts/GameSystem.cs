@@ -8,10 +8,17 @@ public class GameSystem : MonoBehaviour
     [SerializeField] private InputManager inputManager;
 
     public static Action<InputAction.CallbackContext> OnMoveInputContextReceived;
+    public static Action<bool> OnJumpInputContextReceived;
 
     private void Awake()
     {
         inputManager.OnMove += OnMoveInputReceived;
+        inputManager.OnJump += OnJumpInputReceived;
+    }
+
+    private void OnJumpInputReceived(bool isJumpPressed)
+    {
+        OnJumpInputContextReceived?.Invoke(isJumpPressed);
     }
 
     private void OnMoveInputReceived(InputAction.CallbackContext context)

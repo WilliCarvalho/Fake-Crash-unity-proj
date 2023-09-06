@@ -10,6 +10,7 @@ public class InputManager : MonoBehaviour
     private PlayerControls playerControl;
 
     public event Action<InputAction.CallbackContext> OnMove;
+    public event Action<bool> OnJump;
 
     private void Awake()
     {
@@ -20,7 +21,7 @@ public class InputManager : MonoBehaviour
         playerControl.PlayerActions.Move.canceled += OnMoveInput;
 
         playerControl.PlayerActions.Jump.started += OnJumpInput;
-        playerControl.PlayerActions.Jump.performed += OnJumpInput;
+        playerControl.PlayerActions.Jump.canceled += OnJumpInput;
     }
 
     public void OnMoveInput(InputAction.CallbackContext context)
@@ -31,8 +32,7 @@ public class InputManager : MonoBehaviour
 
     public void OnJumpInput(InputAction.CallbackContext context)
     {
-        //isJumping = context.ReadValueAsButton();
-        //Jump();
+        OnJump?.Invoke(context.ReadValueAsButton());
     }
 
     private void OnEnable()
