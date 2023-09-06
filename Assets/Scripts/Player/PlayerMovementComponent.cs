@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -12,6 +13,7 @@ public class PlayerMovementComponent : MonoBehaviour
     private Vector3 cameraRelativeMovement;
     private Vector2 inputData;
     private float playerVelocity;
+    private float gravityValue = -9.81f;
     private bool isMoving;
     private CharacterController characterController;
 
@@ -31,12 +33,18 @@ public class PlayerMovementComponent : MonoBehaviour
     private void Update()
     {
         MoveHandler(inputData);
+        GravityHandler();
+    }
+
+    private void GravityHandler()
+    {
+        print(cameraRelativeMovement + " " + gravityValue *Time.deltaTime);
+        currentMovement.y += gravityValue * Time.deltaTime;
     }
 
     private void MoveHandler(Vector2 inputData)
     {
         currentMovement.x = inputData.x;
-        currentMovement.y = 0;
         currentMovement.z = inputData.y;
 
         cameraRelativeMovement = ConvertToCameraSpace(currentMovement);
@@ -84,6 +92,8 @@ public class PlayerMovementComponent : MonoBehaviour
     {
         
     }
+
+
 
     private void OnDisable()
     {
