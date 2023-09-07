@@ -1,11 +1,5 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
-using static UnityEditor.Timeline.TimelinePlaybackControls;
 
 public class PlayerMovementComponent : MonoBehaviour
 {
@@ -105,13 +99,6 @@ public class PlayerMovementComponent : MonoBehaviour
 
         return directionToMovePlayer;
     }
-
-    private void Jump()
-    {
-        
-    }
-
-
 
     private void OnDisable()
     {

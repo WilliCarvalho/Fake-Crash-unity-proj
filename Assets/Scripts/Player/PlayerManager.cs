@@ -6,6 +6,7 @@ public class PlayerManager : MonoBehaviour
 {
     public static event Action<InputAction.CallbackContext, float> HandleMoveInput;
     public static event Action<bool> HandleJumpInput;
+
     private Transform playerTransform;
     private bool isJumping;
     private bool isMoving;
