@@ -9,14 +9,15 @@ public class PlayerMovementComponent : MonoBehaviour
     private Vector2 inputData;
 
     private float playerVelocity;
-    private float gravityValue = -9.81f;
+    private float gravityVelocity;
+    private const float gravityValue = -9.81f;
 
     private bool isMoving;
-    private bool jumpTrigger;
 
     private CharacterController characterController;
 
-    [SerializeField] private float jumpHeight = 1;
+    [SerializeField] private float jumpPower = 1;
+    [SerializeField] private float gravityMultiplier = 3f;
 
     private void Awake()
     {
@@ -25,19 +26,21 @@ public class PlayerMovementComponent : MonoBehaviour
         characterController = GetComponent<CharacterController>();
 
         PlayerManager.characterControllerReference += GetCharacterController;
-    }    
+    }
 
     private void Update()
     {
-        MoveHandler(inputData);
-        GravityHandler();
-        JumpHandler();
-        print(currentMovement);
+        HandleMovement();
+        HandleGravity();
     }
 
-    private void MakePlayerJump(bool inputValue)
+    private void MakePlayerJump(bool inputValue, int numberOfJumps)
     {
-        jumpTrigger = inputValue;
+        print(numberOfJumps);
+        if (!inputValue) return;
+        if (characterController.isGrounded && numberOfJumps > 2) return;
+
+        gravityVelocity += jumpPower;
     }
 
     private void SetMoveInfo(InputAction.CallbackContext context, float velocity)
@@ -46,8 +49,8 @@ public class PlayerMovementComponent : MonoBehaviour
         inputData = context.ReadValue<Vector2>();
         isMoving = inputData.x != 0 || inputData.y != 0;
     }
-    
-    private void MoveHandler(Vector2 inputData)
+
+    private void HandleMovement()
     {
         currentMovement.x = inputData.x;
         currentMovement.z = inputData.y;
@@ -55,14 +58,6 @@ public class PlayerMovementComponent : MonoBehaviour
         cameraRelativeMovement = ConvertToCameraSpace(currentMovement);
         characterController.Move(cameraRelativeMovement * playerVelocity * Time.deltaTime);
         RotationHandler();
-    }
-
-    private void JumpHandler()
-    {
-        if (jumpTrigger && characterController.isGrounded)
-        {
-            currentMovement.y += Mathf.Sqrt(jumpHeight * -1.0f * gravityValue);
-        }
     }
 
     private void RotationHandler()
@@ -99,17 +94,18 @@ public class PlayerMovementComponent : MonoBehaviour
 
         return directionToMovePlayer;
     }
-    
-    private void GravityHandler()
+
+    private void HandleGravity()
     {
-        if (!characterController.isGrounded)
+        if (characterController.isGrounded && gravityVelocity < 0f)
         {
-            currentMovement.y += gravityValue * Time.deltaTime;
+            gravityVelocity = -1f;
         }
         else
         {
-            currentMovement.y = 0;
+            gravityVelocity += gravityValue * gravityMultiplier * Time.deltaTime;
         }
+        currentMovement.y = gravityVelocity;
     }
 
     private CharacterController GetCharacterController()

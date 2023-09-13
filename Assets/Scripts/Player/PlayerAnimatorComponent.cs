@@ -4,10 +4,12 @@ using UnityEngine;
 public class PlayerAnimatorComponent : MonoBehaviour
 {
     private Animator animator;
+
     private int isJumpingHash;
     private int velocityHash;
+    private int isDoubleJumpingHash;
+
     public bool isJumping;
-    float currentVelocity;
     private void Awake()
     {
         PlayerManager.HandleJumpInput += HandleJumpTrigger;
@@ -16,7 +18,7 @@ public class PlayerAnimatorComponent : MonoBehaviour
         GetAnimatorParameters();
     }
 
-    private void HandleJumpTrigger(bool jumpInputPressed)
+    private void HandleJumpTrigger(bool jumpInputPressed, int numberOfJumps)
     {
         isJumping = jumpInputPressed;
     }
@@ -30,7 +32,7 @@ public class PlayerAnimatorComponent : MonoBehaviour
     {
         bool isJumpingAnimation = animator.GetBool(isJumpingHash);
         CharacterController tempReference = PlayerManager.characterControllerReference();
-        currentVelocity = tempReference.velocity.magnitude;
+        float currentVelocity = tempReference.velocity.magnitude;
         animator.SetFloat(velocityHash, currentVelocity);
 
         if (isJumping && !isJumpingAnimation && tempReference.isGrounded)
@@ -47,5 +49,6 @@ public class PlayerAnimatorComponent : MonoBehaviour
     {
         isJumpingHash = Animator.StringToHash("isJumping");
         velocityHash = Animator.StringToHash("velocity");
+        isDoubleJumpingHash = Animator.StringToHash("isDoubleJumping");
     }
 }

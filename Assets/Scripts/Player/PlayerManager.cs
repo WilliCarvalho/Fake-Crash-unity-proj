@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 public class PlayerManager : MonoBehaviour
 {
     public static event Action<InputAction.CallbackContext, float> HandleMoveInput;
-    public static event Action<bool> HandleJumpInput;
+    public static event Action<bool, int> HandleJumpInput;
 
     public delegate CharacterController GetCharacterController();
     public static GetCharacterController characterControllerReference;
@@ -30,7 +30,9 @@ public class PlayerManager : MonoBehaviour
 
     private void JumpPlayer(bool isJumpPressed)
     {
-        HandleJumpInput?.Invoke(isJumpPressed);
+        if(isJumpPressed) numberOfJumps++;
+
+        HandleJumpInput?.Invoke(isJumpPressed, numberOfJumps);
     }
 
     private void MovePlayer(InputAction.CallbackContext context)
