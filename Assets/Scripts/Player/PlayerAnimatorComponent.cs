@@ -31,7 +31,7 @@ public class PlayerAnimatorComponent : MonoBehaviour
     private void AnimationHandler()
     {
         bool isJumpingAnimation = animator.GetBool(isJumpingHash);
-        CharacterController tempReference = PlayerManager.characterControllerReference();
+        CharacterController tempReference = PlayerManager.characterControllerReference?.Invoke();
         float currentVelocity = tempReference.velocity.magnitude;
         animator.SetFloat(velocityHash, currentVelocity);
 

@@ -38,7 +38,7 @@ public class PlayerMovementComponent : MonoBehaviour
     {
         print(numberOfJumps);
         if (!inputValue) return;
-        if (characterController.isGrounded && numberOfJumps > 2) return;
+        if (!characterController.isGrounded && numberOfJumps > 2) return;
 
         gravityVelocity += jumpPower;
     }

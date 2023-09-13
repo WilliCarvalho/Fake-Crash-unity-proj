@@ -30,6 +30,7 @@ public class PlayerManager : MonoBehaviour
 
     private void JumpPlayer(bool isJumpPressed)
     {
+        if (characterControllerReference?.Invoke().isGrounded == true) numberOfJumps = 0;
         if(isJumpPressed) numberOfJumps++;
 
         HandleJumpInput?.Invoke(isJumpPressed, numberOfJumps);
