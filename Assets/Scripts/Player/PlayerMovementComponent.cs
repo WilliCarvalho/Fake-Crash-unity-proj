@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -6,10 +7,13 @@ public class PlayerMovementComponent : MonoBehaviour
     private Vector3 currentMovement;
     private Vector3 cameraRelativeMovement;
     private Vector2 inputData;
+
     private float playerVelocity;
     private float gravityValue = -9.81f;
+
     private bool isMoving;
     private bool jumpTrigger;
+
     private CharacterController characterController;
 
     [SerializeField] private float jumpHeight = 1;
@@ -19,6 +23,16 @@ public class PlayerMovementComponent : MonoBehaviour
         PlayerManager.HandleMoveInput += SetMoveInfo;
         PlayerManager.HandleJumpInput += MakePlayerJump;
         characterController = GetComponent<CharacterController>();
+
+        PlayerManager.characterControllerReference += GetCharacterController;
+    }    
+
+    private void Update()
+    {
+        MoveHandler(inputData);
+        GravityHandler();
+        JumpHandler();
+        print(currentMovement);
     }
 
     private void MakePlayerJump(bool inputValue)
@@ -32,28 +46,7 @@ public class PlayerMovementComponent : MonoBehaviour
         inputData = context.ReadValue<Vector2>();
         isMoving = inputData.x != 0 || inputData.y != 0;
     }
-
-    private void Update()
-    {
-        MoveHandler(inputData);
-        GravityHandler();
-        JumpHandler();
-    }
-
-    private void JumpHandler()
-    {
-        if (jumpTrigger && characterController.isGrounded)
-        {
-            currentMovement.y += Mathf.Sqrt(jumpHeight * -3.0f * gravityValue);
-        }
-    }
-
-    private void GravityHandler()
-    {
-        print(cameraRelativeMovement + " " + gravityValue *Time.deltaTime);
-        currentMovement.y += gravityValue * Time.deltaTime;
-    }
-
+    
     private void MoveHandler(Vector2 inputData)
     {
         currentMovement.x = inputData.x;
@@ -64,6 +57,13 @@ public class PlayerMovementComponent : MonoBehaviour
         RotationHandler();
     }
 
+    private void JumpHandler()
+    {
+        if (jumpTrigger && characterController.isGrounded)
+        {
+            currentMovement.y += Mathf.Sqrt(jumpHeight * -1.0f * gravityValue);
+        }
+    }
 
     private void RotationHandler()
     {
@@ -98,6 +98,23 @@ public class PlayerMovementComponent : MonoBehaviour
         directionToMovePlayer.y = currentYValue;
 
         return directionToMovePlayer;
+    }
+    
+    private void GravityHandler()
+    {
+        if (!characterController.isGrounded)
+        {
+            currentMovement.y += gravityValue * Time.deltaTime;
+        }
+        else
+        {
+            currentMovement.y = 0;
+        }
+    }
+
+    private CharacterController GetCharacterController()
+    {
+        return characterController;
     }
 
     private void OnDisable()

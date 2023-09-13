@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -7,13 +8,14 @@ public class PlayerManager : MonoBehaviour
     public static event Action<InputAction.CallbackContext, float> HandleMoveInput;
     public static event Action<bool> HandleJumpInput;
 
-    private Transform playerTransform;
-    private bool isJumping;
-    private bool isMoving;
+    public delegate CharacterController GetCharacterController();
+    public static GetCharacterController characterControllerReference;
 
     [SerializeField] private float jumpHeight = 10;
     [SerializeField] private float velocity = 10;
     [SerializeField] private int lives = 1;
+
+    private int numberOfJumps = 0;
 
     private void Awake()
     {
@@ -33,7 +35,6 @@ public class PlayerManager : MonoBehaviour
 
     private void MovePlayer(InputAction.CallbackContext context)
     {
-        isMoving = context.ReadValue<Vector2>().x != 0 || context.ReadValue<Vector2>().y != 0;
         HandleMoveInput?.Invoke(context, velocity);
     }
 

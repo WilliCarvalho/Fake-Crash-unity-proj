@@ -7,16 +7,13 @@ public class PlayerAnimatorComponent : MonoBehaviour
     private int isJumpingHash;
     private int velocityHash;
     public bool isJumping;
-    private CharacterController characterController;
     float currentVelocity;
     private void Awake()
     {
-        characterController = GetComponent<CharacterController>();
         PlayerManager.HandleJumpInput += HandleJumpTrigger;
 
         animator = GetComponent<Animator>();
-        isJumpingHash = Animator.StringToHash("isJumping");
-        velocityHash = Animator.StringToHash("velocity");
+        GetAnimatorParameters();
     }
 
     private void HandleJumpTrigger(bool jumpInputPressed)
@@ -32,10 +29,11 @@ public class PlayerAnimatorComponent : MonoBehaviour
     private void AnimationHandler()
     {
         bool isJumpingAnimation = animator.GetBool(isJumpingHash);
-        currentVelocity = characterController.velocity.magnitude;
+        CharacterController tempReference = PlayerManager.characterControllerReference();
+        currentVelocity = tempReference.velocity.magnitude;
         animator.SetFloat(velocityHash, currentVelocity);
 
-        if (isJumping && !isJumpingAnimation && characterController.isGrounded)
+        if (isJumping && !isJumpingAnimation && tempReference.isGrounded)
         {
             animator.SetBool(isJumpingHash, true);
         }
