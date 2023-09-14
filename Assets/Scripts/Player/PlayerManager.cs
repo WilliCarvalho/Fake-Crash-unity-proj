@@ -5,11 +5,14 @@ using UnityEngine.InputSystem;
 public class PlayerManager : MonoBehaviour
 {
     public static event Action<InputAction.CallbackContext, float> HandleMoveInput;
-    public static event Action<bool> HandleJumpInput;
+    public static event Action<bool, int> HandleJumpInput;
 
-    private Transform playerTransform;
-    private bool isJumping;
-    private bool isMoving;
+    //Delegate para pegar e passar a referência do character controller
+    //(está sendo assinada dentro do PlayerMovementComponent)
+    public delegate CharacterController CharacterControllerReference();
+    public static CharacterControllerReference _characterControllerReference;
+
+    private int numberOfJumps = 0;
 
     [SerializeField] private float jumpHeight = 10;
     [SerializeField] private float velocity = 10;
@@ -26,14 +29,21 @@ public class PlayerManager : MonoBehaviour
         GameSystem.OnJumpInputContextReceived += JumpPlayer;
     }
 
+    private void Update()
+    {
+        print(numberOfJumps);
+    }
+
     private void JumpPlayer(bool isJumpPressed)
     {
-        HandleJumpInput?.Invoke(isJumpPressed);
+        CharacterController tempController = _characterControllerReference?.Invoke();
+        if (tempController.isGrounded == true) numberOfJumps = 0;
+        if (isJumpPressed) numberOfJumps++;
+        HandleJumpInput?.Invoke(isJumpPressed, numberOfJumps);
     }
 
     private void MovePlayer(InputAction.CallbackContext context)
     {
-        isMoving = context.ReadValue<Vector2>().x != 0 || context.ReadValue<Vector2>().y != 0;
         HandleMoveInput?.Invoke(context, velocity);
     }
 
