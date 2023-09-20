@@ -5,11 +5,16 @@ public class PlayerAnimatorComponent : MonoBehaviour
 {
     private Animator animator;
 
+#region Varaibles: AnimationsHash
     private int isJumpingHash;
     private int velocityHash;
-    private int isDoubleJumpingHash;
+    private int numberOfJumpsHash;
+    #endregion
 
+    private int numberOfJumps;
     public bool isJumping;
+
+    float currentVelocity = 0;
     private void Awake()
     {
         PlayerManager.HandleJumpInput += HandleJumpTrigger;
@@ -20,6 +25,8 @@ public class PlayerAnimatorComponent : MonoBehaviour
 
     private void HandleJumpTrigger(bool jumpInputPressed, int numberOfJumps)
     {
+        print(numberOfJumps);
+        if (jumpInputPressed) this.numberOfJumps = numberOfJumps;
         isJumping = jumpInputPressed;
     }
 
@@ -31,15 +38,22 @@ public class PlayerAnimatorComponent : MonoBehaviour
     private void AnimationHandler()
     {
         bool isJumpingAnimation = animator.GetBool(isJumpingHash);
-        CharacterController tempReference = PlayerManager.characterControllerReference?.Invoke();
-        float currentVelocity = tempReference.velocity.magnitude;
-        animator.SetFloat(velocityHash, currentVelocity);
+        CharacterController tempController = PlayerManager._characterControllerReference?.Invoke();
+        currentVelocity = tempController.velocity.magnitude;
 
-        if (isJumping && !isJumpingAnimation && tempReference.isGrounded)
+        animator.SetFloat(velocityHash, currentVelocity);
+        animator.SetInteger(numberOfJumpsHash, numberOfJumps);
+
+        if (tempController.isGrounded || animator.GetInteger(numberOfJumpsHash) > 2)
+        {
+            animator.SetInteger(numberOfJumpsHash, 0);            
+        }
+
+        if (isJumping && !isJumpingAnimation && tempController.isGrounded)
         {
             animator.SetBool(isJumpingHash, true);
         }
-        else if (!isJumping && isJumpingAnimation)
+        else if (isJumpingAnimation || tempController.isGrounded)
         {
             animator.SetBool(isJumpingHash, false);
         }
@@ -49,6 +63,6 @@ public class PlayerAnimatorComponent : MonoBehaviour
     {
         isJumpingHash = Animator.StringToHash("isJumping");
         velocityHash = Animator.StringToHash("velocity");
-        isDoubleJumpingHash = Animator.StringToHash("isDoubleJumping");
+        numberOfJumpsHash = Animator.StringToHash("numberOfJumps");
     }
 }
