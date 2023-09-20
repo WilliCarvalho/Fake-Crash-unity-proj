@@ -4,17 +4,18 @@ using UnityEngine.InputSystem;
 
 public class PlayerMovementComponent : MonoBehaviour
 {
+
     private Vector3 currentMovement;
     private Vector3 cameraRelativeMovement;
     private Vector2 inputData;
 
     private float playerVelocity;
-    private float gravityVelocity;
     private const float gravityValue = -9.81f;
+    private float gravityVelocity;
 
     private bool isMoving;
 
-    private CharacterController characterController;
+    public CharacterController characterController;
 
     [SerializeField] private float jumpPower = 1;
     [SerializeField] private float gravityMultiplier = 3f;
@@ -23,24 +24,24 @@ public class PlayerMovementComponent : MonoBehaviour
     {
         PlayerManager.HandleMoveInput += SetMoveInfo;
         PlayerManager.HandleJumpInput += MakePlayerJump;
-        characterController = GetComponent<CharacterController>();
+        PlayerManager._characterControllerReference = GetCharacterController;
 
-        PlayerManager.characterControllerReference += GetCharacterController;
+        characterController = GetComponent<CharacterController>();
     }
 
     private void Update()
     {
-        HandleMovement();
-        HandleGravity();
+        MoveHandler(inputData);
+        GravityHandler();
     }
 
     private void MakePlayerJump(bool inputValue, int numberOfJumps)
     {
-        print(numberOfJumps);
-        if (!inputValue) return;
-        if (!characterController.isGrounded && numberOfJumps > 2) return;
+        if (inputValue == false) return;
+        if (characterController.isGrounded == false && numberOfJumps > 2) return;
 
         gravityVelocity += jumpPower;
+
     }
 
     private void SetMoveInfo(InputAction.CallbackContext context, float velocity)
@@ -50,7 +51,7 @@ public class PlayerMovementComponent : MonoBehaviour
         isMoving = inputData.x != 0 || inputData.y != 0;
     }
 
-    private void HandleMovement()
+    private void MoveHandler(Vector2 inputData)
     {
         currentMovement.x = inputData.x;
         currentMovement.z = inputData.y;
@@ -94,8 +95,8 @@ public class PlayerMovementComponent : MonoBehaviour
 
         return directionToMovePlayer;
     }
-
-    private void HandleGravity()
+    
+    private void GravityHandler()
     {
         if (characterController.isGrounded && gravityVelocity < 0f)
         {
@@ -105,9 +106,9 @@ public class PlayerMovementComponent : MonoBehaviour
         {
             gravityVelocity += gravityValue * gravityMultiplier * Time.deltaTime;
         }
+        
         currentMovement.y = gravityVelocity;
     }
-
     private CharacterController GetCharacterController()
     {
         return characterController;

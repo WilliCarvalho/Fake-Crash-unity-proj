@@ -12,6 +12,8 @@ public class InputManager : MonoBehaviour
     public event Action<InputAction.CallbackContext> OnMove;
     public event Action<bool> OnJump;
 
+    public event Action<bool> OnAttack; 
+
     private void Awake()
     {
         playerControl = new PlayerControls();
@@ -22,11 +24,19 @@ public class InputManager : MonoBehaviour
 
         playerControl.PlayerActions.Jump.started += OnJumpInput;
         playerControl.PlayerActions.Jump.canceled += OnJumpInput;
+
+        playerControl.PlayerActions.Attack.started += OnAttackInput;
+        playerControl.PlayerActions.Attack.canceled += OnAttackInput;
+    }
+
+    private void OnAttackInput(InputAction.CallbackContext context)
+    {
+        OnAttack?.Invoke(context.ReadValueAsButton());
     }
 
     public void OnMoveInput(InputAction.CallbackContext context)
     {
-        //? = Somente será invocado caso existe um listener no event
+        //? = Somente serï¿½ invocado caso exista um listener no evento
         OnMove?.Invoke(context);
     }
 
