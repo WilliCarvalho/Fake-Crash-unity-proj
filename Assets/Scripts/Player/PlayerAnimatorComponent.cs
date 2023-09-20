@@ -9,6 +9,7 @@ public class PlayerAnimatorComponent : MonoBehaviour
     private int isJumpingHash;
     private int velocityHash;
     private int numberOfJumpsHash;
+    private int isAttackingHash;
     #endregion
 
     private int numberOfJumps;
@@ -18,9 +19,22 @@ public class PlayerAnimatorComponent : MonoBehaviour
     private void Awake()
     {
         PlayerManager.HandleJumpInput += HandleJumpTrigger;
+        PlayerManager.HandleAttackInput += AttackHandler;
 
         animator = GetComponent<Animator>();
         GetAnimatorParameters();
+    }
+
+    private void AttackHandler(bool isAttacking)
+    {
+        if (isAttacking && animator.GetBool(isAttackingHash) == false)
+        {
+            animator.SetBool(isAttackingHash, true);
+        }
+        else if (!isAttacking && animator.GetBool(isAttackingHash))
+        {
+            animator.SetBool(isAttackingHash, false);
+        }
     }
 
     private void HandleJumpTrigger(bool jumpInputPressed, int numberOfJumps)
@@ -64,5 +78,6 @@ public class PlayerAnimatorComponent : MonoBehaviour
         isJumpingHash = Animator.StringToHash("isJumping");
         velocityHash = Animator.StringToHash("velocity");
         numberOfJumpsHash = Animator.StringToHash("numberOfJumps");
+        isAttackingHash = Animator.StringToHash("isAttacking");
     }
 }

@@ -9,11 +9,18 @@ public class GameSystem : MonoBehaviour
 
     public static Action<InputAction.CallbackContext> OnMoveInputContextReceived;
     public static Action<bool> OnJumpInputContextReceived;
+    public static Action<bool> OnAttackInputContextReceived;
 
     private void Awake()
     {
         inputManager.OnMove += OnMoveInputReceived;
         inputManager.OnJump += OnJumpInputReceived;
+        inputManager.OnAttack += OnAttackInputReceived;
+    }
+
+    private void OnAttackInputReceived(bool isAttackPressed)
+    {
+        OnAttackInputContextReceived?.Invoke(isAttackPressed);
     }
 
     private void OnJumpInputReceived(bool isJumpPressed)
@@ -25,7 +32,6 @@ public class GameSystem : MonoBehaviour
     {
         OnMoveInputContextReceived?.Invoke(context);
     }
-
     private void OnDisable()
     {
         inputManager.OnMove -= OnMoveInputReceived;
