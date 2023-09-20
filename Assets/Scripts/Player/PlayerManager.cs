@@ -53,5 +53,4 @@ public class PlayerManager : MonoBehaviour
     {
         GameSystem.OnMoveInputContextReceived -= HandleMove;
     }
-
 }
