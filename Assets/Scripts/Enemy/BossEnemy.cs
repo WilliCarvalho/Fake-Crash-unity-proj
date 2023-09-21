@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -11,6 +9,9 @@ public enum EBossState
     Hit
 }
 
+[RequireComponent(typeof(NavMeshAgent))]
+[RequireComponent(typeof(CapsuleCollider))]
+[RequireComponent(typeof(SphereCollider))]
 public class BossEnemy : MonoBehaviour
 {
     [SerializeField] private float velocity;
@@ -20,17 +21,23 @@ public class BossEnemy : MonoBehaviour
 
     private float delayTimer = 0f;
     private bool isDelaying;
+    
     private EBossState currentState;
-
     private NavMeshAgent navAgent;
+    private SphereCollider sphereCollider;
 
     private void Awake()
     {
+        sphereCollider = GetComponent<SphereCollider>();
+        sphereCollider.enabled = false;
+        
         navAgent = GetComponent<NavMeshAgent>();
         navAgent.speed = velocity;
 
         currentState = EBossState.Idle;
         isDelaying = false;
+
+        GameSystem.OnBossTriggered += StartBossFight;
     }
 
     private void Update()
@@ -67,6 +74,7 @@ public class BossEnemy : MonoBehaviour
                 if(isDelaying == false)
                 {                    
                     //attack animation
+                    sphereCollider.enabled = true;
                     delayTimer = 0;
                     isDelaying = true;                    
                 }
@@ -85,11 +93,10 @@ public class BossEnemy : MonoBehaviour
         }
 
     }
-
-    private void StartDieAnimation()
+    
+    private void StartBossFight()
     {
-        //StarDieAnimation
-        Destroy(this.gameObject);
+        currentState = EBossState.Walk;
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -103,5 +110,11 @@ public class BossEnemy : MonoBehaviour
         {
             StartDieAnimation();            
         }
+    }
+    
+    private void StartDieAnimation()
+    {
+        //StarDieAnimation
+        Destroy(this.gameObject);
     }
 }
