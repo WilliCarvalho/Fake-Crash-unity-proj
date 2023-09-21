@@ -9,25 +9,41 @@ public class PlayerAnimatorComponent : MonoBehaviour
     private int isJumpingHash;
     private int velocityHash;
     private int numberOfJumpsHash;
+    private int isAttackingHash;
     #endregion
 
     private int numberOfJumps;
-    public bool isJumping;
+    private bool isJumping;
+    private bool isAttacking;
 
     float currentVelocity = 0;
     private void Awake()
     {
-        PlayerManager.HandleJumpInput += HandleJumpTrigger;
+        PlayerManager.HandleJumpInput += JumpTriggerHandler;
+        PlayerManager.HandleAttackInput += AttackHandler;
 
         animator = GetComponent<Animator>();
         GetAnimatorParameters();
     }
 
-    private void HandleJumpTrigger(bool jumpInputPressed, int numberOfJumps)
+    private void JumpTriggerHandler(bool jumpInputPressed, int numberOfJumps)
     {
         print(numberOfJumps);
         if (jumpInputPressed) this.numberOfJumps = numberOfJumps;
         isJumping = jumpInputPressed;
+    }
+
+    private void AttackHandler(bool isAttacking)
+    {
+        this.isAttacking = isAttacking;
+        if(this.isAttacking && animator.GetBool(isAttackingHash) == false)
+        {
+            animator.SetBool(isAttackingHash, true);
+        }
+        else if (animator.GetBool(isAttackingHash) == true && this.isAttacking == false)
+        {
+            animator.SetBool(isAttackingHash, false);
+        }
     }
 
     private void Update()
@@ -64,5 +80,6 @@ public class PlayerAnimatorComponent : MonoBehaviour
         isJumpingHash = Animator.StringToHash("isJumping");
         velocityHash = Animator.StringToHash("velocity");
         numberOfJumpsHash = Animator.StringToHash("numberOfJumps");
+        isAttackingHash = Animator.StringToHash("isAttacking");
     }
 }

@@ -6,11 +6,15 @@ public class PlayerManager : MonoBehaviour
 {
     public static event Action<InputAction.CallbackContext, float> HandleMoveInput;
     public static event Action<bool, int> HandleJumpInput;
+    public static event Action<bool> HandleAttackInput;
 
     //Delegate para pegar e passar a referência do character controller
     //(está sendo assinada dentro do PlayerMovementComponent)
     public delegate CharacterController CharacterControllerReference();
     public static CharacterControllerReference _characterControllerReference;
+
+    public delegate Vector3 PlayerPosition();
+    public static PlayerPosition _playerPosition;
 
     private int numberOfJumps = 0;
 
@@ -25,16 +29,12 @@ public class PlayerManager : MonoBehaviour
 
     private void PlayerManagerSetUpListenerns()
     {
-        GameSystem.OnMoveInputContextReceived += MovePlayer;
-        GameSystem.OnJumpInputContextReceived += JumpPlayer;
+        GameSystem.OnMoveInputContextReceived += HandleMove;
+        GameSystem.OnJumpInputContextReceived += HandleJump;
+        GameSystem.OnAttackInputContextReceived += HandleAttack;
     }
 
-    private void Update()
-    {
-        print(numberOfJumps);
-    }
-
-    private void JumpPlayer(bool isJumpPressed)
+    private void HandleJump(bool isJumpPressed)
     {
         CharacterController tempController = _characterControllerReference?.Invoke();
         if (tempController.isGrounded == true) numberOfJumps = 0;
@@ -42,14 +42,19 @@ public class PlayerManager : MonoBehaviour
         HandleJumpInput?.Invoke(isJumpPressed, numberOfJumps);
     }
 
-    private void MovePlayer(InputAction.CallbackContext context)
+    private void HandleMove(InputAction.CallbackContext context)
     {
         HandleMoveInput?.Invoke(context, velocity);
     }
 
+    private void HandleAttack(bool isAttacking)
+    {
+        HandleAttackInput?.Invoke(isAttacking);
+    }
+
     private void OnDisable()
     {
-        GameSystem.OnMoveInputContextReceived -= MovePlayer;
+        GameSystem.OnMoveInputContextReceived -= HandleMove;
     }
 
 }

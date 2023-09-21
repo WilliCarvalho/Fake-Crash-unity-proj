@@ -25,9 +25,11 @@ public class PlayerMovementComponent : MonoBehaviour
         PlayerManager.HandleMoveInput += SetMoveInfo;
         PlayerManager.HandleJumpInput += MakePlayerJump;
         PlayerManager._characterControllerReference = GetCharacterController;
+        PlayerManager._playerPosition = GetPlayerPosition;
 
         characterController = GetComponent<CharacterController>();
     }
+
 
     private void Update()
     {
@@ -40,7 +42,7 @@ public class PlayerMovementComponent : MonoBehaviour
         if (inputValue == false) return;
         if (characterController.isGrounded == false && numberOfJumps > 2) return;
 
-        gravityVelocity += jumpPower;
+        gravityVelocity = jumpPower;
 
     }
 
@@ -108,6 +110,10 @@ public class PlayerMovementComponent : MonoBehaviour
         }
         
         currentMovement.y = gravityVelocity;
+    }
+    private Vector3 GetPlayerPosition()
+    {
+        return transform.position;
     }
     private CharacterController GetCharacterController()
     {
